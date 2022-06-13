@@ -1,0 +1,91 @@
+x-superset-image: &superset-image superset-1.5.1-extended
+
+x-superset-env: &superset-env docker/.env-non-dev
+
+x-superset-depends-on: &superset-depends-on
+  - db
+  - redis
+
+x-superset-networks: &superset-networks
+  - default
+  - custom_db_network
+
+x-superset-volumes:
+  &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
+  - ./docker:/app/docker
+  - superset_home:/app/superset_home
+
+volumes:
+  superset_home:
+    external: false
+  db_home:
+    external: false
+  redis:
+    external: false
+
+networks:
+  custom_db_network:
+    external: true
+
+version: '3.7'
+services:
+  redis:
+    image: redis:latest
+    networks: *superset-networks
+    container_name: superset_cache
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+
+  db:
+    env_file: *superset-env
+    image: postgres:10
+    networks: *superset-networks
+    container_name: superset_db
+    restart: unless-stopped
+    volumes:
+      - db_home:/var/lib/postgresql/data
+
+  superset:
+    env_file: *superset-env
+    image: *superset-image
+    networks: *superset-networks
+    container_name: superset_app
+    command: ['/app/docker/docker-bootstrap.sh', 'app-gunicorn']
+    user: 'root'
+    restart: unless-stopped
+    ports:
+      - '8088:8088'
+    depends_on: *superset-depends-on
+    volumes: *superset-volumes
+
+  superset-worker:
+    image: *superset-image
+    networks: *superset-networks
+    container_name: superset_worker
+    command: ['/app/docker/docker-bootstrap.sh', 'worker']
+    env_file: *superset-env
+    restart: unless-stopped
+    depends_on: *superset-depends-on
+    user: 'root'
+    volumes: *superset-volumes
+
+  superset-worker-beat:
+    image: *superset-image
+    networks: *superset-networks
+    container_name: superset_worker_beat
+    command: ['/app/docker/docker-bootstrap.sh', 'beat']
+    env_file: *superset-env
+    restart: unless-stopped
+    depends_on: *superset-depends-on
+    user: 'root'
+    volumes: *superset-volumes
+
+  # superset-init:
+  #   image: *superset-image
+  #   container_name: superset_init
+  #   command: ["/app/docker/docker-init.sh"]
+  #   env_file: *superset-env
+  #   depends_on: *superset-depends-on
+  #   user: "root"
+  #   volumes: *superset-volumes

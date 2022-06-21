@@ -8,7 +8,6 @@ x-superset-depends-on: &superset-depends-on
 
 x-superset-networks: &superset-networks
   - default
-  - custom_db_network
 
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
@@ -81,11 +80,11 @@ services:
     user: 'root'
     volumes: *superset-volumes
 
-  # superset-init:
-  #   image: *superset-image
-  #   container_name: superset_init
-  #   command: ["/app/docker/docker-init.sh"]
-  #   env_file: *superset-env
-  #   depends_on: *superset-depends-on
-  #   user: "root"
-  #   volumes: *superset-volumes
+  superset-init:
+    image: *superset-image
+    container_name: superset_init
+    command: ["/app/docker/docker-init.sh"]
+    env_file: *superset-env
+    depends_on: *superset-depends-on
+    user: "root"
+    volumes: *superset-volumes

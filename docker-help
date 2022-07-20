@@ -1,0 +1,68 @@
+If I can help you, my email is：17600542215@163.com
+
+1、装机
+
+此时 ifconfig即可查看 ip，即可使用该ip进行shell连接
+
+
+2、安装解压命令 
+yum install -y tar
+yum install zip unzip
+
+3、安装docker
+1. 更新yum 
+sudo yum update
+2. 安装docker依赖的软件包
+sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+3. 设置yum镜像源
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+ 
+4. 查看所有仓库中所有docker版本，并选择特定版本安装
+yum list docker-ce --showduplicates | sort -r
+ 
+5. 安装最新版本或指定版本
+#安装最新版本
+sudo yum install docker-ce
+
+#安装指定版本,19.03.6版本
+sudo yum install docker-ce-19.03.6
+ 安装时需要下载安装包，要等待一定时间。下载完成后 让你接收gpg密钥 输入：Y
+安装成功后会出现下面的信息：
+
+ 
+ 
+6. 启动docker
+执行下面命令，启动docker并加入开机自动启动。
+sudo systemctl start docker   //启动docker 
+sudo systemctl enable docker  //开机自启docker 
+查看docker版本。
+docker version
+
+4、安装docker-compose
+将docker-compose文件上传至/usr/local/bin/后
+# 添加可执行权限
+sudo chmod +x /usr/local/bin/docker-compose
+# 查看docker-compose版本
+docker-compose -v
+
+5、运行superset
+将superset.zip上传至 /root/目录
+[root@localhost ~]# cd /root/
+[root@localhost ~]# unzip superset.zip
+[root@localhost ~]# cd superset
+
+[root@localhost ~]# cd /root/superset/docker
+[root@localhost docker]# chmod 777 docker-bootstrap.sh docker-ci.sh docker-frontend.sh docker-init.sh frontend-mem-nag.sh
+[root@localhost ~]# cd /root/superset
+[root@localhost superset]# docker-compose -f docker-compose-non-dev.yml pull
+
+
+[root@localhost superset]# docker-compose -f docker-compose-non-dev.yml up
+
+[root@localhost ~]# docker ps
+
+6、访问superset
+访问地址：http://192.168.0.114:8088/login/
+账号：admin
+密码：admin
+
